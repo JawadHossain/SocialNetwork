@@ -1,7 +1,25 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+const Post = require("./models/post");
 
 const app = express();
+
+// Connect Database
+mongoose
+  .connect(
+    `mongodb+srv://jhossain:${process.env.MONGODB_PASS}@cluster0.un59u.mongodb.net/social-network?retryWrites=true&w=majority`,
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
+  .then(() => {
+    console.log("Connected to database!");
+  })
+  .catch(() => {
+    console.log("Connection Failed!");
+  });
+
 // Add parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -22,30 +40,33 @@ app.use((req, res, next) => {
 
 // Create Post
 app.post("/api/posts", (req, res, next) => {
-  const post = req.body;
-  console.log(post);
-  res.status(201).json({
-    message: "Post added successfully!",
+  const post = new Post({
+    title: req.body.title,
+    content: req.body.content,
+  });
+  post.save().then((createdPost) => {
+    res.status(201).json({
+      message: "Post added successfully!",
+      postId: createdPost._id,
+    });
   });
 });
 
 // Get Posts
 app.get("/api/posts", (req, res, next) => {
-  let posts = [
-    {
-      id: "fadf124",
-      title: "First server-side post",
-      content: "This is coming from the server",
-    },
-    {
-      id: "fasdfadf124",
-      title: "Second server-side post",
-      content: "This is coming from the server",
-    },
-  ];
-  res.status(200).json({
-    message: "Posts fetched successfully",
-    posts: posts,
+  Post.find().then((documents) => {
+    res.status(200).json({
+      message: "Posts fetched successfully",
+      posts: documents,
+    });
+  });
+});
+
+// Delete Post
+app.delete("/api/posts/:id", (req, res, next) => {
+  Post.deleteOne({ _id: req.params.id }).then((result) => {
+    console.log(result);
+    res.status(200).json({ message: "Post deleted!" });
   });
 });
 

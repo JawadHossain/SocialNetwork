@@ -70,7 +70,6 @@ router.put(
       imagePath: imagePath,
     });
 
-    console.log(post);
     Post.updateOne({ _id: req.params.id }, post).then((result) => {
       res.status(200).json({ message: "Update Successful" });
     });
@@ -79,12 +78,27 @@ router.put(
 
 // Get All Posts
 router.get("", (req, res, next) => {
-  Post.find().then((documents) => {
-    res.status(200).json({
-      message: "Posts fetched successfully",
-      posts: documents,
+  // Extract query params
+  const pageSize = req.query.pagesize;
+  const currentPage = req.query.page;
+
+  let fetchedPosts;
+  const postQuery = Post.find();
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1)).limit(+pageSize);
+  }
+  postQuery
+    .then((documents) => {
+      fetchedPosts = documents;
+      return Post.countDocuments();
+    })
+    .then((count) => {
+      res.status(200).json({
+        message: "Posts fetched successfully",
+        posts: fetchedPosts,
+        maxPosts: count,
+      });
     });
-  });
 });
 
 // Get a Post
@@ -101,7 +115,6 @@ router.get("/:id", (req, res, next) => {
 // Delete Post
 router.delete("/:id", (req, res, next) => {
   Post.deleteOne({ _id: req.params.id }).then((result) => {
-    console.log(result);
     res.status(200).json({ message: "Post deleted!" });
   });
 });

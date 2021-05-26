@@ -1,6 +1,7 @@
-const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const express = require("express");
+const path = require("path");
 require("dotenv").config();
 
 // import routes
@@ -24,6 +25,8 @@ mongoose
 // Add parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use("/images", express.static(path.join("backend/images")));
 
 // Setup CORS
 app.use((req, res, next) => {

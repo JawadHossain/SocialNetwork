@@ -13,6 +13,11 @@ export class PostsService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  /**
+   * Getter for all posts
+   * Accepts query params for additional control
+   * Transforms response to handle different names id and _id
+   */
   getPosts(postsPerPage: number, currentPage: number) {
     const queryParams = `?pagesize=${postsPerPage}&page=${currentPage}`;
     this.http
@@ -28,6 +33,7 @@ export class PostsService {
                 content: post.content,
                 id: post._id,
                 imagePath: post.imagePath,
+                creator: post.creator,
               };
             }),
             maxPosts: postData.maxPosts,
@@ -53,6 +59,7 @@ export class PostsService {
       title: string;
       content: string;
       imagePath: string;
+      creator: string;
     }>(`http://localhost:3000/api/posts/${id}`);
   }
 
@@ -82,12 +89,13 @@ export class PostsService {
       postData.append('content', content);
       postData.append('image', image, title);
     } else {
-      // create JSON for String type
+      // create JSON for String type. creator not set here for safety
       postData = {
         id: id,
         title: title,
         content: content,
         imagePath: image,
+        creator: null
       };
     }
     this.http

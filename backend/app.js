@@ -2,7 +2,6 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const express = require("express");
 const path = require("path");
-require("dotenv").config();
 
 // import routes
 const postsRoutes = require("./routes/posts");

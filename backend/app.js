@@ -43,6 +43,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Setup routes
 app.use("/api/posts", postsRoutes);
 app.use("/api/user", userRoutes);
 
